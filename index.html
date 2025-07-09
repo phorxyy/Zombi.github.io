@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Ormanda Zombi Avı</title>
+  <style>
+    body { margin:0; background:#111; color:white; text-align:center; font-family:sans-serif; }
+    canvas { display:block; margin:20px auto; border:3px solid #000; background-color:#444; }
+  </style>
+</head>
+<body>
+  <h1>🧟 Ormanda Zombi Avı</h1>
+  <p>WASD ile hareket et, SPACE ile saldır</p>
+  <p>Skor: <span id="score">0</span></p>
+  <canvas id="game" width="900" height="500"></canvas>
+
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+
+    const playerImg = new Image();
+    playerImg.src = 'img/player.png';
+
+    const zombieImg = new Image();
+    zombieImg.src = 'img/zombie.png';
+
+    const bgImg = new Image();
+    bgImg.src = 'img/background.png';
+
+    let keys = {};
+    let score = 0;
+    let zombies = [];
+
+    const player = { x: 100, y: 380, w: 60, h: 80, speed: 4, attacking: false };
+
+    function spawnZombie() {
+      zombies.push({ x: 900, y: 380, w: 60, h: 80, speed: 2 });
+    }
+
+    function drawBackground() {
+      ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+    }
+
+    function drawPlayer() {
+      ctx.drawImage(playerImg, player.x, player.y, player.w, player.h);
+    }
+
+    function drawZombies() {
+      zombies.forEach(z => {
+        ctx.drawImage(zombieImg, z.x, z.y, z.w, z.h);
+      });
+    }
+
+    function update() {
+      if (keys['w']) player.y -= player.speed;
+      if (keys['s']) player.y += player.speed;
+      if (keys['a']) player.x -= player.speed;
+      if (keys['d']) player.x += player.speed;
+
+      zombies.forEach(z => { z.x -= z.speed; });
+      zombies = zombies.filter(z => z.x + z.w > 0);
+
+      if (player.attacking) {
+        zombies.forEach((z, i) => {
+          if (Math.abs(player.x - z.x) < 60 && Math.abs(player.y - z.y) < 40) {
+            zombies.splice(i, 1);
+            score++;
+            document.getElementById('score').textContent = score;
+          }
+        });
+      }
+    }
+
+    function draw() {
+      drawBackground();
+      drawPlayer();
+      drawZombies();
+    }
+
+    function gameLoop() {
+      update();
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    setInterval(spawnZombie, 2000);
+
+    document.addEventListener('keydown', e => {
+      keys[e.key.toLowerCase()] = true;
+      if (e.code === 'Space') {
+        player.attacking = true;
+        setTimeout(() => (player.attacking = false), 300);
+      }
+    });
+
+    document.addEventListener('keyup', e => {
+      keys[e.key.toLowerCase()] = false;
+    });
+
+    gameLoop();
+  </script>
+</body>
+</html>
+const playerImg = new Image();
+playerImg.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAABSCAYAAAC3v7DrAAAABmJLR0QA/wD/AP+gvaeTAAABKElEQVRoge2YQQ6DMAxF0xH//7dNLQ5TwQ3hD9Mu9omxUrWzW2Bh2vEFhGZLMQEhNqQ+NkpQoIg+qC4+xS+f7gH+X6NEpX65Q9gZMXGvLysOHH20z5yRqgPGS0LXq2LcTYGgHgEzNx0QJkCF0U6K4S7pPLP+w64hBRg8Cg2a3ENcTTvEAnM+v9ikLJrXywgMLv3jhDBGe4RZo7j1eTdxlcnUYgRkK+cq+UJ80np8dLzI1EyBD5vKJl8VQSpYtp0rfuYvQy0nI05qIKUbrMuJJSF6JKHyY6lsLkItX6VchDo2QldnmgFZex7jXQf+NEJ9VQOmnyA3BZv/NuAHSnQqLhdpENAAAAAElFTkSuQmCC';
+const zombieImg = new Image();
+zombieImg.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAABSCAYAAAC3v7DrAAAABmJLR0QA/wD/AP+gvaeTAAABJklEQVRoge2YwQ3DIAxFJ4S9bff/kXXIKUTDk1vjxU7Lu7Rgq4qVkIYvLMRJDW6h5iV6jCMvwkQlt+Oh99BOhHHbgn6uF9eQdADkAEUxyytc6V8gNwAmBojAjLrAUBU4CLDmT19ADoTw6QELgm2BVKQq+kxA2N6nFshvA3oHkAKB+nyfQNgLIAXFNR2DRLgJQ6CqH1CyGrIdqC3CvplYF+cyKwWvAC5PEqMqys0XDD1g0SpkJ1vyePQzoHaJig5XOayL6RwLYHVQ3i1dfDYpCMfQfKkLeTRQv+URhKpY0HxZj+7R+U5CTnS1Lq9LAO9kY6Mo+j3pxCEW3Rd71Z3BvOaVLTNQBtDW/Rv6KPH/51wWqEC8NtggAAAABJRU5ErkJggg==';
+const bgImg = new Image();
+bgImg.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAECAYAAAB9Sn/GAAAABmJLR0QA/wD/AP+gvaeTAAABQ0lEQVRoge2YoQ3DIAxErX//6qYqJAExRAxVnvr31SmR7K3Pq8JrLzMFiXpyHFRk2hwkjmTIooB1+wK95ALCBqTtQbUEO5OcCKA0Pp49S4t8Hm/7Qj2DEYqoYapgDLx5AXew3sPcEZ3keOd5nDrOEbt1Zc9/fD4/AVxsC9hUKBEs1CdUZ8B/cKls7wjYAVHcACtMiU3RGIE9VJKoGpBwpUq3A7EeMAAmRUR1idjuovYVFD5GI3r6l+QU+eOSc0/Atw9+GVHnGYvMT3N8WgyExnXD0epxAdDkOVb2uC2glAgS5VK7kHCSFWEKuY15z56qFp1kUQghEZMQmJlf5wUSw+uUAAAAAElFTkSuQmCC';
